@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Ensure NFS mount is accessible.
+# Check if the NFS mount is available
 echo "Checking if NFS mount is available at /mnt/ncdata..."
-if ! mountpoint -q /mnt/ncdata; then
-    echo "NFS mount not found. Please check your NFS configuration."
+if ! mount | grep /mnt/ncdata > /dev/null; then
+    echo "Error: /mnt/ncdata is not mounted. Please mount your NFS share."
     exit 1
 fi
 
@@ -11,7 +11,7 @@ fi
 echo "Pulling latest Nextcloud AIO image..."
 docker pull nextcloud/all-in-one:latest
 
-# Run the Docker container
+# Start the Nextcloud container
 echo "Starting the Nextcloud container..."
 sudo docker run \
   --init \
@@ -24,8 +24,8 @@ sudo docker run \
   --env APACHE_PORT=11000 \
   --env APACHE_IP_BINDING=0.0.0.0 \
   --env SKIP_DOMAIN_VALIDATION=true \
-  --env PUID=1000 \  # Replace with your PUID
-  --env PGID=1000 \  # Replace with your PGID
+  --env PUID=1000 \
+  --env PGID=1000 \
   --volume nextcloud_aio_mastercontainer:/mnt/docker-aio-config \
   --volume /var/run/docker.sock:/var/run/docker.sock:ro \
   --volume /mnt/ncdata:/mnt/ncdata \
